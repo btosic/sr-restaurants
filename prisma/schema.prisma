@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Customer {
+  Id                Int       @id @default(autoincrement())
+  Email             String    @unique
+  PasswordHash      String
+  Name              String
+  Address           String?
+  CreatedAt         DateTime  @default(now())
+  Verified          Boolean   @default(false)
+  VerificationCode  String
+  MfaSecret         String
+  Orders            Order[]
+}
+
+model Restaurant {
+  Id                Int      @id @default(autoincrement())
+  Email             String   @unique
+  PasswordHash      String
+  Name              String
+  Address           String?
+  LocationX         Float
+  LocationY         Float
+  Verified          Boolean   @default(false)
+  VerificationCode  String
+  MfaSecret         String
+  Menus             Menu[]
+}
+
+model Menu {
+  Id            Int      @id @default(autoincrement())
+  Name          String   @db.VarChar(255)
+  Restaurant    Restaurant  @relation(fields: [RestaurantId], references: [Id])
+  RestaurantId  Int
+  MenuItems     MenuItem[]
+}
+
+model MenuItem {
+  Id          Int     @id @default(autoincrement())
+  Name        String  @db.VarChar(255)
+  Description String
+  Price       Decimal
+  Menu        Menu    @relation(fields: [MenuId], references: [Id])
+  MenuId      Int
+  Orders      Order[]
+}
+
+model Order {
+  Id          Int       @id @default(autoincrement())
+  TotalAmount Decimal   @default(0)
+  IsPaid      Boolean   @default(false)
+  Customer    Customer  @relation(fields: [CustomerId], references: [Id])
+  CustomerId  Int
+  MenuItems   MenuItem[]
+}
